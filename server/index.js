@@ -4,9 +4,7 @@ const _ = require('lodash')
 const data = require('./data')
 
 const wss = new WebSocketServer({ port: 3000 })
-
-const MESSAGE_INTERVAL = 300
-
+const MESSAGE_INTERVAL = 3000
 const messageTypes = {
   UNKNOWN: 'UNKNOWN',
   PICTURE: 'PICTURE',
@@ -15,7 +13,6 @@ const messageTypes = {
 
 function createMessage() {
   const payload = data[_.random(data.length - 1)]
-  console.log(payload)
   return {
     type: messageTypes.PICTURE,
     payload,
@@ -23,7 +20,10 @@ function createMessage() {
 }
 
 function addNewConnection(ws) {
-  console.log('Received a Connection')
+  console.log('Received a connection')
+
+  console.log('Subscribed to message stream')
+  broadcastMessages$.subscribe(msg => ws.send(msg))
 
   ws.on('message', function handleMessage (rawMsg) {
     let msg
@@ -43,22 +43,17 @@ function addNewConnection(ws) {
   })
 
   ws.on('close', function (e) {
-    console.log('closed', e)
+    console.log('Closed connection', e)
   })
-
-  const output$ = Rx.Observable.zip(
-    Rx.Observable.of(ws).delay(0).repeat(),            // delays are added
-    Rx.Observable.interval(MESSAGE_INTERVAL).delay(0), // to make both observables lazy
-    function combineObservables(ws, interval) {
-      return [ws, interval]
-    }
-  )
-
-  return output$
 }
 
+const broadcastMessages$ = Rx.Observable.interval(MESSAGE_INTERVAL)
+      .map(_ => createMessage())
+      .map(msg => JSON.stringify(msg))
+      .publish()
+
+broadcastMessages$.connect()
+
 const connections$ = Rx.Observable.fromEvent(wss, 'connection')
-      .flatMap(ws => addNewConnection(ws))
-      .map(([ws, interval]) => [ws, createMessage(interval)])
-      .do(([ws, message]) => ws.send(JSON.stringify(message)))
+      .do(ws => addNewConnection(ws))
       .subscribe()
