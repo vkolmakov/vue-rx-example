@@ -33,7 +33,7 @@ function addNewConnection(ws) {
   console.log('Received a connection')
 
   console.log('Subscribed to message stream')
-  broadcastMessages$.subscribe(msg => ws.send(msg))
+  const broadcastSubscription = broadcastMessages$.subscribe(msg => ws.send(msg))
 
   ws.on('message', function handleMessage (rawMsg) {
     let msg
@@ -54,6 +54,7 @@ function addNewConnection(ws) {
 
   ws.on('close', function (e) {
     console.log('Closed connection', e)
+    broadcastSubscription.unsubscribe()
   })
 }
 
@@ -61,8 +62,7 @@ const broadcastMessages$ = Rx.Observable.interval(MESSAGE_INTERVAL)
       .map(_ => createMessage())
       .map(msg => JSON.stringify(msg))
       .publish()
-
-broadcastMessages$.connect()
+      .refCount()
 
 const connections$ = Rx.Observable.fromEvent(wss, 'connection')
       .do(ws => addNewConnection(ws))
