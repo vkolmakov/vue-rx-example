@@ -4,18 +4,28 @@ const _ = require('lodash')
 const data = require('./data')
 
 const wss = new WebSocketServer({ port: 3000 })
-const MESSAGE_INTERVAL = 3000
+const MESSAGE_INTERVAL = 2000
 const messageTypes = {
   UNKNOWN: 'UNKNOWN',
   PICTURE: 'PICTURE',
-  PING: 'PING'
+  PING: 'PING',
+  PONG: 'PONG',
 }
 
 function createMessage() {
-  const payload = data[_.random(data.length - 1)]
   return {
     type: messageTypes.PICTURE,
-    payload,
+    payload: data[_.random(data.length - 1)],
+  }
+}
+
+function createPongMessage() {
+  return {
+    type: messageTypes.PONG,
+    payload: {
+      title: 'PONG CAT!',
+      link: 'https://media.giphy.com/media/4IAzyrhy9rkis/giphy.gif',
+    },
   }
 }
 
@@ -35,7 +45,7 @@ function addNewConnection(ws) {
 
     switch (msg.type) {
     case messageTypes.PING:
-      ws.send(JSON.stringify({ type: 'PONG' }))
+      ws.send(JSON.stringify(createPongMessage()))
       break
     default:
       break
