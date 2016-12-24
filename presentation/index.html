@@ -7,10 +7,61 @@
 		<title>reveal.js</title>
 
 		<link rel="stylesheet" href="css/reveal.css">
-		<link rel="stylesheet" href="css/theme/black.css">
+    <link rel="stylesheet" href="css/theme/black.css">
+
+    <link href="https://unpkg.com/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet"/>
 
 		<!-- Theme used for syntax highlighting of code -->
 		<link rel="stylesheet" href="lib/css/zenburn.css">
+
+    <style>
+     .reveal section img.logo-inline {
+       border: none;
+       background: transparent;
+       box-shadow: none;
+       margin: 0;
+     }
+
+     .reveal section i.fa.fa-heart {
+       color: #d43470;
+     }
+
+     .flex-row {
+       display: flex;
+       align-items: center;
+       justify-content: center;
+     }
+
+     .flex-row > h1, .flex-row > i {
+       font-size: 2.5em;
+       margin: 0;
+     }
+
+     .flex-row > img.logo-inline {
+       height: 2.5em;
+       width: 2.5em;
+     }
+
+     .flex-row > h1 {
+       margin: 0 0.2em;
+     }
+
+
+     .strikethrough {
+       position: relative;
+     }
+     .strikethrough:before {
+       position: absolute;
+       content: "";
+       left: 0;
+       top: 50%;
+       right: 0;
+       border-top: 0.1em solid;
+       border-color: #d43470;
+
+       transform:rotate(-7deg);
+     }
+    </style>
 
 		<!-- Printing and PDF exports -->
 		<script>
@@ -24,8 +75,83 @@
 	<body>
 		<div class="reveal">
 			<div class="slides">
-				<section>Slide 1</section>
-				<section>Slide 2</section>
+        <section>
+
+          <h1>
+            Using Rx.js with Vue
+          </h1>
+
+        </section>
+
+        <section>
+
+          <div class="flex-row">
+            <h1>Quick</h1>
+            <img class="logo-inline" src="images/rxjs-logo.svg"/>
+            <h1>primer</h1>
+          </div>
+
+        </section>
+
+
+        <section>
+
+          <h2>Handling events is hard</h2>
+          <h2>Handling data is <span class="strikethrough">easy</span> <span>easier</span></h2>
+
+        </section>
+
+        <section>
+
+          <h2>Here's how we handle data</h2>
+
+          <pre><code class="hljs" data-trim contenteditable>
+const characters = [
+  { name: 'Philipp', age: 25 },
+  { name: 'Leela', age: 26 },
+  { name: 'Hubert', age: 163 },
+  { name: 'Amy', age: 22 }
+]
+
+characters.map(character => character.age) // [25, 26, 163, 22]
+          .filter(age => age < 100) // [25, 26, 22]
+          .reduce((sum, age) => sum + age, 0) // 73
+          </code></pre>
+
+
+        </section>
+
+        <section>
+
+          <h2>Treat events like data</h2>
+
+          <pre><code class="hljs" data-trim contenteditable>
+import Rx from 'rxjs/Rx'
+
+const mouseClicks$ = Rx.Observable.fromEvent(
+  document.getElementsByTagName('body')[0],
+  'click'
+) // [MouseEvent, MouseEvent, MouseEvent, MouseEvent, ...]
+
+mouseClicks$.map(event => event.x) // [6, 7, 923, 200, ...]
+            .filter(x => x < 500) // [6, 7, 200, ...]
+            .scan((sum, x) => sum + x, 0) // (6 + 7 + 200 + ...)
+            .subscribe()
+          </code></pre>
+
+        </section>
+
+        <section>
+
+          <div class="flex-row">
+            <img class="logo-inline" src="images/vuejs-logo.svg"/>
+            <h1>+</h1>
+            <img class="logo-inline" src="images/rxjs-logo.svg"/>
+            <h1>=</h1>
+            <i class="fa fa-heart" aria-hidden="true"></i>
+          </div>
+
+        </section>
 			</div>
 		</div>
 
