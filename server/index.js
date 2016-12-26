@@ -4,7 +4,7 @@ const _ = require('lodash')
 const data = require('./data')
 
 const wss = new WebSocketServer({ port: 3000 })
-const MESSAGE_INTERVAL = 2000
+const MESSAGE_INTERVAL = 100
 const messageTypes = {
   UNKNOWN: 'UNKNOWN',
   PICTURE: 'PICTURE',
