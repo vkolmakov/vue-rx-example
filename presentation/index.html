@@ -7,12 +7,12 @@
 		<title>reveal.js</title>
 
 		<link rel="stylesheet" href="css/reveal.css">
-    <link rel="stylesheet" href="css/theme/black.css">
+    <link rel="stylesheet" href="css/theme/simple.css">
 
     <link href="https://unpkg.com/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet"/>
 
 		<!-- Theme used for syntax highlighting of code -->
-		<link rel="stylesheet" href="lib/css/zenburn.css">
+    <link rel="stylesheet" href="lib/css/monokai-sublime.css">
 
     <style>
      .reveal section img.logo-inline {
@@ -22,8 +22,27 @@
        margin: 0;
      }
 
+     .reveal section a {
+       color: #333;
+     }
+
+     .reveal section h1 {
+       color: #333;
+       font-size: 2.5em;
+     }
+
+
+     .reveal section h2 {
+       color: #333;
+     }
+
+
      .reveal section i.fa.fa-heart {
        color: #d43470;
+     }
+
+     .reveal section i.fa.fa-github {
+       color: #59297d;
      }
 
      .flex-row {
@@ -54,12 +73,12 @@
        position: absolute;
        content: "";
        left: 0;
-       top: 50%;
+       top: 60%;
        right: 0;
        border-top: 0.1em solid;
        border-color: #d43470;
 
-       transform:rotate(-7deg);
+       transform:rotate(-10deg);
      }
     </style>
 
@@ -78,7 +97,7 @@
         <section>
 
           <h1>
-            Using Rx.js with Vue
+            Rx.js with Vue
           </h1>
 
         </section>
@@ -86,7 +105,7 @@
         <section>
 
           <div class="flex-row">
-            <h1>Quick</h1>
+            <h1>quick</h1>
             <img class="logo-inline" src="images/rxjs-logo.svg"/>
             <h1>primer</h1>
           </div>
@@ -96,14 +115,14 @@
 
         <section>
 
-          <h2>Handling events is hard</h2>
-          <h2>Handling data is <span class="strikethrough">easy</span> <span>easier</span></h2>
+          <h2>handling events is hard</h2>
+          <h2>handling data is <span class="strikethrough">easy</span> <span>easier</span></h2>
 
         </section>
 
         <section>
 
-          <h2>Here's how we handle data</h2>
+          <h2>here's how we handle data</h2>
 
           <pre><code class="hljs" data-trim contenteditable>
 const characters = [
@@ -123,7 +142,7 @@ characters.map(character => character.age) // [25, 26, 163, 22]
 
         <section>
 
-          <h2>Treat events like data</h2>
+          <h2>treat events like data</h2>
 
           <pre><code class="hljs" data-trim contenteditable>
 import Rx from 'rxjs/Rx'
@@ -152,6 +171,57 @@ mouseClicks$.map(event => event.x) // [6, 7, 923, 200, ...]
           </div>
 
         </section>
+
+        <section>
+
+          <h2>vue-rx</h2>
+          <a href="https://github.com/vuejs/vue-rx">
+            <i class="fa fa-github"></i>
+            https://github.com/vuejs/vue-rx
+          </a>
+
+        </section>
+
+        <section>
+          <h3>main.js</h3>
+          <pre><code class="hljs" data-trim contenteditable>
+import Vue from 'vue'
+import Rx from 'rxjs/Rx'
+import VueRx from 'vue-rx'
+
+Vue.use(VueRx, Rx)
+          </code></pre>
+
+          <h3>App.vue</h3>
+          <pre><code class="hljs" data-trim contenteditable>
+export default {
+  subscriptions () {
+    return {
+      clicks$: this.$fromDOMEvent('body', 'click'),
+      ticks$: Rx.Observable.interval(1000),
+    }
+  }
+}
+          </code></pre>
+
+        </section>
+
+        <section>
+          <h3>vue-rx goodies</h3>
+          <pre><code class="hljs" data-trim contenteditable>
+this.$subscriptions
+
+this.$watchAsObservable(prop)
+this.$fromDOMEvent(selector, event)
+this.$subscribeTo(observable, next, err, complete)
+          </code></pre>
+
+          </ul>
+        </section>
+
+        <section data-background="images/demo.gif">
+          <h1 style="color: #fff">demo</h1>
+        </section>
 			</div>
 		</div>
 
@@ -160,7 +230,8 @@ mouseClicks$.map(event => event.x) // [6, 7, 923, 200, ...]
 
 		<script>
 			// More info https://github.com/hakimel/reveal.js#configuration
-			Reveal.initialize({
+     Reveal.initialize({
+       controls: false,
 				history: true,
 
 				// More info https://github.com/hakimel/reveal.js#dependencies
