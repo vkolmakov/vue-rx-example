@@ -1,41 +1,26 @@
 const WebSocketServer = require('uws').Server
 const Rx = require('rxjs/Rx')
-const _ = require('lodash')
-const data = require('./data')
+const { MESSAGE_INTERVAL, messageTypes } = require('./constants')
+const { createMessage, createPongMessage } = require('./messages')
 
 const wss = new WebSocketServer({ port: 3000 })
-const MESSAGE_INTERVAL = 100
-const messageTypes = {
-  UNKNOWN: 'UNKNOWN',
-  PICTURE: 'PICTURE',
-  PING: 'PING',
-  PONG: 'PONG',
-}
 
-function createMessage() {
-  return {
-    type: messageTypes.PICTURE,
-    payload: data[_.random(data.length - 1)],
-  }
-}
+const pongMessages$ = new Rx.Subject()
 
-function createPongMessage() {
-  return {
-    type: messageTypes.PONG,
-    payload: {
-      title: 'PONG CAT!',
-      link: 'https://media.giphy.com/media/4IAzyrhy9rkis/giphy.gif',
-    },
-  }
-}
+const broadcastMessages$ = Rx.Observable.interval(MESSAGE_INTERVAL)
+      .map(createMessage)
+      .merge(pongMessages$)
+      .map(JSON.stringify)
+
+broadcastMessages$.publish()
+  .refCount()
 
 function addNewConnection(ws) {
   console.log('Received a connection')
-
   console.log('Subscribed to message stream')
-  const broadcastSubscription = broadcastMessages$.subscribe(msg => ws.send(msg))
+  const broadcastSubscription = broadcastMessages$.subscribe(ws.send.bind(ws))
 
-  ws.on('message', function handleMessage (rawMsg) {
+  ws.on('message', (rawMsg) => {
     let msg
     try {
       msg = JSON.parse(rawMsg)
@@ -45,25 +30,19 @@ function addNewConnection(ws) {
 
     switch (msg.type) {
     case messageTypes.PING:
-      ws.send(JSON.stringify(createPongMessage()))
+      pongMessages$.next(createPongMessage())
       break
     default:
       break
     }
   })
 
-  ws.on('close', function (e) {
+  ws.on('close', (e) => {
     console.log('Closed connection', e)
     broadcastSubscription.unsubscribe()
   })
 }
 
-const broadcastMessages$ = Rx.Observable.interval(MESSAGE_INTERVAL)
-      .map(_ => createMessage())
-      .map(msg => JSON.stringify(msg))
-      .publish()
-      .refCount()
-
 const connections$ = Rx.Observable.fromEvent(wss, 'connection')
-      .do(ws => addNewConnection(ws))
+      .do(addNewConnection)
       .subscribe()
